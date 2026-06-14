@@ -1,0 +1,60 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Post {
+  id          String   @id @default(cuid())
+  content     String   // The rich text / HTML content
+  status      String   @default("DRAFT") // DRAFT, SCHEDULED, PUBLISHED
+  publishAt   DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  media       Media[]
+  publications PostPublication[]
+}
+
+model Channel {
+  id          String   @id @default(cuid())
+  name        String   // e.g. "Main Telegram Channel"
+  platform    String   // e.g. "TELEGRAM", "INSTAGRAM"
+  platformId  String   // The actual Chat ID or User ID (e.g. "-100123456")
+  credentials String?  // Optional JSON for platform-specific tokens if needed
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  
+  publications PostPublication[]
+}
+
+model PostPublication {
+  id          String   @id @default(cuid())
+  postId      String
+  channelId   String
+  status      String   @default("PENDING") // PENDING, SUCCESS, ERROR
+  errorMsg    String?
+  externalId  String?  // Message ID on the remote platform
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  post        Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  channel     Channel  @relation(fields: [channelId], references: [id], onDelete: Cascade)
+}
+
+model Media {
+  id        String   @id @default(cuid())
+  postId    String
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  type      String   // 'photo', 'video', 'document'
+  url       String   // local file path or public url
+  mimeType  String
+  filename  String
+  createdAt DateTime @default(now())
+}
