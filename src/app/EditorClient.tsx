@@ -2,14 +2,15 @@
 
 import { useState } from 'react';
 import Editor from '@/components/Editor';
-import { createPost } from './actions';
-import { Send, Save, AlertCircle, CalendarClock, Network } from 'lucide-react';
+import { createPost, sendPreview } from './actions';
+import { Send, Save, AlertCircle, CalendarClock, Network, Eye } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 export default function EditorClient({ initialPost, channels = [] }: { initialPost?: any, channels?: any[] }) {
   const router = useRouter();
   const [content, setContent] = useState(initialPost?.content || '');
   const [loading, setLoading] = useState(false);
+  const [previewLoading, setPreviewLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
   // Channel selection
@@ -63,6 +64,22 @@ export default function EditorClient({ initialPost, channels = [] }: { initialPo
     }
     
     setLoading(false);
+  };
+
+  const handlePreview = async () => {
+    if (!content || content === '<p></p>') {
+      setError('Пост не может быть пустым');
+      return;
+    }
+    setPreviewLoading(true);
+    setError(null);
+    const result = await sendPreview(content);
+    if (!result.success) {
+      setError(result.error || 'Ошибка отправки превью');
+    } else {
+      alert('Превью успешно отправлено в тестовый канал!');
+    }
+    setPreviewLoading(false);
   };
 
   return (
@@ -144,11 +161,21 @@ export default function EditorClient({ initialPost, channels = [] }: { initialPo
       <div className="mt-6 flex flex-wrap gap-3">
         <button
           onClick={() => handlePublish(true)}
-          disabled={loading}
+          disabled={loading || previewLoading}
           className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white px-6 py-2.5 rounded-lg font-medium transition-colors"
         >
           <Send size={18} />
           Опубликовать сейчас
+        </button>
+
+        <button
+          onClick={handlePreview}
+          disabled={previewLoading || loading}
+          type="button"
+          className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white px-6 py-2.5 rounded-lg font-medium transition-colors"
+        >
+          <Eye size={18} />
+          Превью
         </button>
         
         {isScheduling ? (

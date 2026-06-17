@@ -6,16 +6,31 @@ export async function htmlToRichMessage(html: string) {
   const root = parse(html);
 
   const imgElements = root.querySelectorAll('img');
+  const attachments = [];
   
   for (const el of imgElements) {
     const src = el.getAttribute('src');
-    // If the image is locally uploaded via our editor
+    let localPath = null;
     if (src && src.startsWith('/uploads/')) {
+      localPath = src;
+    } else if (src && src.includes('/uploads/')) {
       try {
-        const filePath = path.join(process.cwd(), 'public', src);
+        const urlObj = new URL(src);
+        if (urlObj.pathname.startsWith('/uploads/')) {
+          localPath = urlObj.pathname;
+        }
+      } catch (e) {
+        // ignore invalid URL
+      }
+    }
+
+    // If the image is locally uploaded via our editor
+    if (localPath) {
+      try {
+        const filePath = path.join(process.cwd(), 'public', localPath);
         const buffer = fs.readFileSync(filePath);
-        const fileName = path.basename(src);
-        const mimeType = 'image/' + (path.extname(src).slice(1) || 'png');
+        const fileName = path.basename(localPath);
+        const mimeType = 'image/' + (path.extname(localPath).slice(1) || 'png');
         
         // We will use tmpfiles.org's free API. Telegram will cache the image natively.
         const formData = new FormData();
@@ -37,7 +52,7 @@ export async function htmlToRichMessage(html: string) {
           console.error('tmpfiles upload failed:', result);
         }
       } catch(e) {
-        console.error('Failed to upload local image to Telegraph', e);
+        console.error('Failed to upload local image', e);
       }
     }
   }

@@ -29,6 +29,7 @@ model Channel {
   platformId  String   // The actual Chat ID or User ID (e.g. "-100123456")
   credentials String?  // Optional JSON for platform-specific tokens if needed
   isActive    Boolean  @default(true)
+  isTestChannel Boolean @default(false)
   createdAt   DateTime @default(now())
   
   publications PostPublication[]

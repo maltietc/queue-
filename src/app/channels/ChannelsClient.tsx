@@ -13,6 +13,7 @@ export default function ChannelsClient({ initialChannels }: { initialChannels: a
   // New channel form
   const [name, setName] = useState('');
   const [platformId, setPlatformId] = useState('');
+  const [isTestChannel, setIsTestChannel] = useState(false);
   const [error, setError] = useState('');
 
   const handleAddChannel = async (e: React.FormEvent) => {
@@ -26,10 +27,11 @@ export default function ChannelsClient({ initialChannels }: { initialChannels: a
     setError('');
     
     try {
-      const newChannel = await createChannel(name, 'TELEGRAM', platformId);
+      const newChannel = await createChannel(name, 'TELEGRAM', platformId, isTestChannel);
       setChannels([newChannel, ...channels]);
       setName('');
       setPlatformId('');
+      setIsTestChannel(false);
       router.refresh();
     } catch (err: any) {
       setError(err.message || 'Ошибка при добавлении канала');
@@ -88,6 +90,16 @@ export default function ChannelsClient({ initialChannels }: { initialChannels: a
             />
           </div>
 
+          <label className="flex items-center gap-2 cursor-pointer mt-2 text-sm text-gray-300">
+            <input 
+              type="checkbox" 
+              checked={isTestChannel}
+              onChange={e => setIsTestChannel(e.target.checked)}
+              className="w-4 h-4 rounded bg-[#111] border-[#333]" 
+            />
+            Сделать тестовым каналом (для предпросмотра)
+          </label>
+
           <button
             type="submit"
             disabled={loading}
@@ -108,7 +120,12 @@ export default function ChannelsClient({ initialChannels }: { initialChannels: a
           channels.map(channel => (
             <div key={channel.id} className="flex items-center justify-between bg-[#1a1a1a] border border-[#333] p-4 rounded-lg">
               <div className="flex flex-col">
-                <span className="font-medium text-lg">{channel.name}</span>
+                <div className="flex items-center gap-2">
+                  <span className="font-medium text-lg">{channel.name}</span>
+                  {channel.isTestChannel && (
+                    <span className="text-xs bg-purple-900/50 text-purple-300 border border-purple-700/50 px-2 py-0.5 rounded">Тестовый</span>
+                  )}
+                </div>
                 <span className="text-sm text-gray-500 font-mono">{channel.platformId}</span>
               </div>
               

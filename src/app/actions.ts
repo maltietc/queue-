@@ -86,9 +86,9 @@ export async function getChannels() {
   return await prisma.channel.findMany({ orderBy: { createdAt: 'desc' } });
 }
 
-export async function createChannel(name: string, platform: string, platformId: string) {
+export async function createChannel(name: string, platform: string, platformId: string, isTestChannel: boolean = false) {
   return await prisma.channel.create({
-    data: { name, platform, platformId }
+    data: { name, platform, platformId, isTestChannel }
   });
 }
 
@@ -125,4 +125,27 @@ export async function getPostById(id: string) {
     }
   });
   return post;
+}
+
+export async function sendPreview(content: string) {
+  try {
+    const testChannel = await prisma.channel.findFirst({
+      where: { isTestChannel: true, platform: 'TELEGRAM', isActive: true }
+    });
+    
+    if (!testChannel) {
+      return { success: false, error: 'Тестовый канал не найден. Пожалуйста, добавьте или отметьте его в разделе Каналы.' };
+    }
+    
+    const botToken = process.env.TELEGRAM_BOT_TOKEN;
+    if (!botToken) throw new Error("BOT TOKEN IS MISSING");
+    
+    const { sendRichMessage } = require('@/lib/telegram/provider');
+    await sendRichMessage(botToken, testChannel.platformId, content);
+    
+    return { success: true };
+  } catch (error: any) {
+    console.error('Error sending preview:', error);
+    return { success: false, error: error.message || 'Ошибка отправки превью' };
+  }
 }
