@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import { Table } from '@tiptap/extension-table';
@@ -15,7 +16,7 @@ import {
   Strikethrough, Quote, Code, FileCode2, Heading1, Heading2, 
   Heading3, Minus 
 } from 'lucide-react';
-import { useEffect } from 'react';
+
 
 interface EditorProps {
   content: string;
@@ -23,6 +24,8 @@ interface EditorProps {
 }
 
 export default function Editor({ content, onChange }: EditorProps) {
+  const [, setUpdateTrigger] = useState(0);
+
   const editor = useEditor({
     extensions: [
       StarterKit,
@@ -42,9 +45,15 @@ export default function Editor({ content, onChange }: EditorProps) {
     onUpdate: ({ editor }) => {
       onChange(editor.getHTML());
     },
+    onSelectionUpdate: () => {
+      setUpdateTrigger(v => v + 1);
+    },
+    onTransaction: () => {
+      setUpdateTrigger(v => v + 1);
+    },
     editorProps: {
       attributes: {
-        class: 'prose prose-invert max-w-none min-h-[300px] w-full p-4 border border-[var(--border)] rounded-b-md bg-[var(--card)] focus:outline-none',
+        class: 'prose prose-invert max-w-none min-h-[60vh] w-full p-4 border border-[var(--border)] rounded-b-md bg-[var(--card)] focus:outline-none',
       },
       handlePaste: (view, event, slice) => {
         const items = Array.from(event.clipboardData?.items || []);
@@ -121,12 +130,20 @@ export default function Editor({ content, onChange }: EditorProps) {
     }
   };
 
+  const getBtnClass = (isActive: boolean) => {
+    return `p-2 rounded transition-all duration-200 ${
+      isActive 
+        ? 'bg-blue-600 text-white shadow-[inset_0_2px_4px_rgba(0,0,0,0.3)] border border-blue-500 scale-95' 
+        : 'text-gray-400 hover:bg-[#333] hover:text-white border border-transparent'
+    }`;
+  };
+
   return (
     <div className="w-full flex flex-col mt-4">
       <div className="flex flex-wrap gap-2 p-2 border border-b-0 border-[var(--border)] rounded-t-md bg-[#222]">
         <button
           onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
-          className={`p-2 rounded hover:bg-[#333] transition-colors ${editor.isActive('heading', { level: 1 }) ? 'bg-[#333] text-blue-400' : ''}`}
+          className={getBtnClass(editor.isActive('heading', { level: 1 }))}
           title="Heading 1"
           type="button"
         >
@@ -134,7 +151,7 @@ export default function Editor({ content, onChange }: EditorProps) {
         </button>
         <button
           onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-          className={`p-2 rounded hover:bg-[#333] transition-colors ${editor.isActive('heading', { level: 2 }) ? 'bg-[#333] text-blue-400' : ''}`}
+          className={getBtnClass(editor.isActive('heading', { level: 2 }))}
           title="Heading 2"
           type="button"
         >
@@ -142,7 +159,7 @@ export default function Editor({ content, onChange }: EditorProps) {
         </button>
         <button
           onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
-          className={`p-2 rounded hover:bg-[#333] transition-colors ${editor.isActive('heading', { level: 3 }) ? 'bg-[#333] text-blue-400' : ''}`}
+          className={getBtnClass(editor.isActive('heading', { level: 3 }))}
           title="Heading 3"
           type="button"
         >
@@ -152,7 +169,7 @@ export default function Editor({ content, onChange }: EditorProps) {
         
         <button
           onClick={() => editor.chain().focus().toggleBold().run()}
-          className={`p-2 rounded hover:bg-[#333] transition-colors ${editor.isActive('bold') ? 'bg-[#333] text-blue-400' : ''}`}
+          className={getBtnClass(editor.isActive('bold'))}
           title="Bold"
           type="button"
         >
@@ -160,7 +177,7 @@ export default function Editor({ content, onChange }: EditorProps) {
         </button>
         <button
           onClick={() => editor.chain().focus().toggleItalic().run()}
-          className={`p-2 rounded hover:bg-[#333] transition-colors ${editor.isActive('italic') ? 'bg-[#333] text-blue-400' : ''}`}
+          className={getBtnClass(editor.isActive('italic'))}
           title="Italic"
           type="button"
         >
@@ -168,7 +185,7 @@ export default function Editor({ content, onChange }: EditorProps) {
         </button>
         <button
           onClick={() => editor.chain().focus().toggleUnderline().run()}
-          className={`p-2 rounded hover:bg-[#333] transition-colors ${editor.isActive('underline') ? 'bg-[#333] text-blue-400' : ''}`}
+          className={getBtnClass(editor.isActive('underline'))}
           title="Underline"
           type="button"
         >
@@ -176,7 +193,7 @@ export default function Editor({ content, onChange }: EditorProps) {
         </button>
         <button
           onClick={() => editor.chain().focus().toggleStrike().run()}
-          className={`p-2 rounded hover:bg-[#333] transition-colors ${editor.isActive('strike') ? 'bg-[#333] text-blue-400' : ''}`}
+          className={getBtnClass(editor.isActive('strike'))}
           title="Strikethrough"
           type="button"
         >
@@ -187,7 +204,7 @@ export default function Editor({ content, onChange }: EditorProps) {
         
         <button
           onClick={addLink}
-          className={`p-2 rounded hover:bg-[#333] transition-colors ${editor.isActive('link') ? 'bg-[#333] text-blue-400' : ''}`}
+          className={getBtnClass(editor.isActive('link'))}
           title="Link"
           type="button"
         >
@@ -195,7 +212,7 @@ export default function Editor({ content, onChange }: EditorProps) {
         </button>
         <button
           onClick={addImage}
-          className="p-2 rounded hover:bg-[#333] transition-colors"
+          className={getBtnClass(false)}
           title="Image"
           type="button"
         >
@@ -204,7 +221,7 @@ export default function Editor({ content, onChange }: EditorProps) {
         <div className="w-px h-6 bg-[#444] self-center mx-1" />
         <button
           onClick={() => editor.chain().focus().toggleBlockquote().run()}
-          className={`p-2 rounded hover:bg-[#333] transition-colors ${editor.isActive('blockquote') ? 'bg-[#333] text-blue-400' : ''}`}
+          className={getBtnClass(editor.isActive('blockquote'))}
           title="Blockquote"
           type="button"
         >
@@ -212,7 +229,7 @@ export default function Editor({ content, onChange }: EditorProps) {
         </button>
         <button
           onClick={() => editor.chain().focus().toggleCode().run()}
-          className={`p-2 rounded hover:bg-[#333] transition-colors ${editor.isActive('code') ? 'bg-[#333] text-blue-400' : ''}`}
+          className={getBtnClass(editor.isActive('code'))}
           title="Inline Code"
           type="button"
         >
@@ -220,7 +237,7 @@ export default function Editor({ content, onChange }: EditorProps) {
         </button>
         <button
           onClick={() => editor.chain().focus().toggleCodeBlock().run()}
-          className={`p-2 rounded hover:bg-[#333] transition-colors ${editor.isActive('codeBlock') ? 'bg-[#333] text-blue-400' : ''}`}
+          className={getBtnClass(editor.isActive('codeBlock'))}
           title="Code Block"
           type="button"
         >
@@ -229,7 +246,7 @@ export default function Editor({ content, onChange }: EditorProps) {
         <div className="w-px h-6 bg-[#444] self-center mx-1" />
         <button
           onClick={() => editor.chain().focus().toggleBulletList().run()}
-          className={`p-2 rounded hover:bg-[#333] transition-colors ${editor.isActive('bulletList') ? 'bg-[#333] text-blue-400' : ''}`}
+          className={getBtnClass(editor.isActive('bulletList'))}
           title="Bullet List"
           type="button"
         >
@@ -237,7 +254,7 @@ export default function Editor({ content, onChange }: EditorProps) {
         </button>
         <button
           onClick={() => editor.chain().focus().toggleOrderedList().run()}
-          className={`p-2 rounded hover:bg-[#333] transition-colors ${editor.isActive('orderedList') ? 'bg-[#333] text-blue-400' : ''}`}
+          className={getBtnClass(editor.isActive('orderedList'))}
           title="Ordered List"
           type="button"
         >

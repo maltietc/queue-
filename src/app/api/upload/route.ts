@@ -15,19 +15,29 @@ export async function POST(req: NextRequest) {
     const bytes = await file.arrayBuffer();
     const originalBuffer = Buffer.from(bytes);
 
-    // Resize image to optimal 1200px width, keeping aspect ratio, and convert to JPEG for optimal size
-    const buffer = await sharp(originalBuffer)
-      .resize({
-        width: 1200,
-        fit: 'inside',      // maintain aspect ratio
-        withoutEnlargement: false, // will enlarge if smaller than 1200px as requested
-      })
-      .jpeg({ quality: 85 })
-      .toBuffer();
+    let buffer: Buffer;
+    let ext: string;
+
+    // Check if the file is a GIF
+    if (file.type === 'image/gif') {
+      // Save GIF as is to preserve animation
+      buffer = originalBuffer;
+      ext = '.gif';
+    } else {
+      // Resize other images to optimal 1200px width, keeping aspect ratio, and convert to JPEG for optimal size
+      buffer = await sharp(originalBuffer)
+        .resize({
+          width: 1200,
+          fit: 'inside',      // maintain aspect ratio
+          withoutEnlargement: false, // will enlarge if smaller than 1200px as requested
+        })
+        .jpeg({ quality: 85 })
+        .toBuffer();
+      ext = '.jpg';
+    }
 
     // Create unique filename
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-    const ext = '.jpg'; // since we are saving as jpeg
     const filename = `${uniqueSuffix}${ext}`;
 
     const uploadDir = path.join(process.cwd(), 'public', 'uploads');

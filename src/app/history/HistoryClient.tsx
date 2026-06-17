@@ -1,6 +1,8 @@
 'use client';
 
 import { format } from 'date-fns';
+import Link from 'next/link';
+import { Edit } from 'lucide-react';
 
 export default function HistoryClient({ posts }: { posts: any[] }) {
   if (posts.length === 0) {
@@ -39,9 +41,17 @@ export default function HistoryClient({ posts }: { posts: any[] }) {
                 </div>
               )}
             </div>
-            <span className="text-sm text-gray-500">
-              Создан: {format(new Date(post.createdAt), 'dd.MM.yyyy HH:mm')}
-            </span>
+            <div className="flex flex-col items-end gap-2">
+              <span className="text-sm text-gray-500">
+                Создан: {format(new Date(post.createdAt), 'dd.MM.yyyy HH:mm')}
+              </span>
+              <Link 
+                href={`/?id=${post.id}`}
+                className="flex items-center gap-1.5 text-sm bg-blue-600/20 hover:bg-blue-600/40 text-blue-400 px-3 py-1.5 rounded transition-colors"
+              >
+                <Edit size={14} /> Редактировать
+              </Link>
+            </div>
           </div>
           <div className="bg-[#1a1a1a] p-4 rounded-lg border border-[#333]">
             <div 
