@@ -1,4 +1,4 @@
-# OmniPost (Content Scheduler)
+# queue (Content Scheduler)
 
 A lightweight, multi-channel social media scheduler and content management hub built with Next.js and Prisma. Currently focused on Telegram, with architectural foundations for Instagram, YouTube, LinkedIn, and more.
 
