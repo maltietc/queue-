@@ -86,9 +86,9 @@ export async function getChannels() {
   return await prisma.channel.findMany({ orderBy: { createdAt: 'desc' } });
 }
 
-export async function createChannel(name: string, platform: string, platformId: string, isTestChannel: boolean = false) {
+export async function createChannel(name: string, platform: string, platformId: string, isTestChannel: boolean = false, category?: string) {
   return await prisma.channel.create({
-    data: { name, platform, platformId, isTestChannel }
+    data: { name, platform, platformId, isTestChannel, category: category || null }
   });
 }
 

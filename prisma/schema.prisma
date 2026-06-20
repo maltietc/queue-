@@ -25,8 +25,9 @@ model Post {
 model Channel {
   id          String   @id @default(cuid())
   name        String   // e.g. "Main Telegram Channel"
-  platform    String   // e.g. "TELEGRAM", "INSTAGRAM"
+  platform    String   // e.g. "TELEGRAM", "VK", "INSTAGRAM"
   platformId  String   // The actual Chat ID or User ID (e.g. "-100123456")
+  category    String?  // Optional grouping label
   credentials String?  // Optional JSON for platform-specific tokens if needed
   isActive    Boolean  @default(true)
   isTestChannel Boolean @default(false)

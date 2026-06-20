@@ -9,13 +9,15 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ [
   const activeChannels = allChannels.filter(c => c.isActive);
 
   return (
-    <div className="p-8 max-w-4xl mx-auto">
-      <header className="mb-8">
-        <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
+    <div className="px-8 py-8 max-w-4xl mx-auto">
+      <header className="mb-6">
+        <h1 className="text-2xl font-semibold" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
           {post ? 'Редактирование поста' : 'Новый пост'}
         </h1>
-        <p className="text-gray-400 mt-2">
-          {post ? 'Внесите изменения в сохраненный черновик' : 'Создайте и отформатируйте пост для Telegram'}
+        <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>
+          {post
+            ? 'Внесите изменения в сохранённый черновик'
+            : 'Создайте и отформатируйте пост для публикации'}
         </p>
       </header>
 

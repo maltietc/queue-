@@ -1,21 +1,17 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter } from "next/font/google";
 import "./globals.css";
 import Sidebar from "@/components/Sidebar";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+const inter = Inter({
+  subsets: ["latin", "cyrillic"],
+  variable: "--font-inter",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "TG Scheduler",
-  description: "Telegram Scheduled Posts Manager",
+  title: "Content Scheduler",
+  description: "Мультиплатформенный планировщик контента",
 };
 
 export default function RootLayout({
@@ -24,13 +20,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-    >
-      <body className="h-full flex bg-[var(--background)] text-[var(--foreground)] overflow-hidden">
+    <html lang="ru" className={`${inter.variable} h-full`}>
+      <body className="h-full flex overflow-hidden" style={{ background: 'var(--bg-primary)', color: 'var(--text-primary)' }}>
         <Sidebar />
-        <main className="flex-1 overflow-y-auto">
+        <main className="flex-1 overflow-y-auto" style={{ background: 'var(--bg-primary)' }}>
           {children}
         </main>
       </body>

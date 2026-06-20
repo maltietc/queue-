@@ -1,58 +1,67 @@
 'use client';
 
 import { format } from 'date-fns';
+import { ru } from 'date-fns/locale';
 import { useRouter } from 'next/navigation';
-import { Edit2 } from 'lucide-react';
+import { Edit2, FileEdit } from 'lucide-react';
 
 export default function DraftsClient({ drafts }: { drafts: any[] }) {
   const router = useRouter();
 
   if (drafts.length === 0) {
     return (
-      <div className="bg-[var(--card)] border border-[var(--border)] rounded-xl p-8 text-center text-gray-500">
-        У вас пока нет черновиков
+      <div className="flex flex-col items-center justify-center py-16 gap-3 text-center">
+        <FileEdit size={40} style={{ color: 'var(--text-tertiary)' }} />
+        <p className="font-medium" style={{ color: 'var(--text-primary)' }}>Черновиков пока нет</p>
+        <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+          Создайте пост и сохраните как черновик
+        </p>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-1">
       {drafts.map((post) => {
-        // Простая очистка от HTML тегов для создания заголовка
-        const plainText = post.content.replace(/<[^>]*>?/gm, '').replace(/&nbsp;/g, ' ').trim();
-        const title = plainText.length > 80 ? plainText.substring(0, 80) + '...' : plainText;
+        const plainText = post.content
+          .replace(/<[^>]*>?/gm, '')
+          .replace(/&nbsp;/g, ' ')
+          .trim();
+        const title = plainText.length > 90 ? plainText.substring(0, 90) + '…' : plainText;
+        const date = format(new Date(post.updatedAt || post.createdAt), 'd MMMM, HH:mm', { locale: ru });
 
         return (
-          <div 
-            key={post.id} 
+          <div
+            key={post.id}
             onClick={() => router.push(`/?id=${post.id}`)}
-            className="group flex flex-col bg-[var(--card)] border border-[var(--border)] hover:border-blue-500/50 rounded-lg cursor-pointer transition-all duration-300"
+            className="group flex items-center justify-between px-4 py-3 rounded-sm cursor-pointer transition-all"
+            style={{ borderRadius: 'var(--radius-sm)' }}
+            onMouseEnter={e => (e.currentTarget.style.background = 'var(--bg-hover)')}
+            onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
           >
-            {/* Строка списка (заголовок) */}
-            <div className="flex items-center justify-between p-4 bg-[#111] group-hover:bg-[#1a1a1a] rounded-lg transition-colors">
-              <div className="flex items-center gap-4 flex-1 min-w-0">
-                <span className="text-xs text-gray-500 whitespace-nowrap bg-[#222] px-2 py-1 rounded border border-[#333]">
-                  {format(new Date(post.updatedAt || post.createdAt), 'dd.MM.yyyy HH:mm')}
-                </span>
-                <span className="text-sm text-gray-200 font-medium truncate">
-                  {title || 'Пост без текста'}
-                </span>
+            <div className="flex items-center gap-3 flex-1 min-w-0">
+              {/* Doc icon */}
+              <div className="flex-shrink-0 w-8 h-8 rounded flex items-center justify-center" style={{ background: 'var(--bg-secondary)' }}>
+                <FileEdit size={14} style={{ color: 'var(--text-tertiary)' }} />
               </div>
-              <div className="flex items-center gap-2 text-blue-400 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 ml-4">
-                <span className="text-xs font-medium">Редактировать</span>
-                <Edit2 size={16} />
-              </div>
+
+              {/* Title */}
+              <span className="text-sm truncate" style={{ color: 'var(--text-primary)' }}>
+                {title || <span style={{ color: 'var(--text-tertiary)' }}>Пост без текста</span>}
+              </span>
             </div>
-            
-            {/* Выпадающий контент (раскрывается при наведении) */}
-            <div className="grid grid-rows-[0fr] group-hover:grid-rows-[1fr] transition-all duration-300 ease-in-out">
-              <div className="overflow-hidden">
-                <div className="p-6 border-t border-[#222] bg-[var(--card)] rounded-b-lg">
-                  <div 
-                    className="text-sm text-gray-300 prose prose-sm prose-invert max-w-none"
-                    dangerouslySetInnerHTML={{ __html: post.content }}
-                  />
-                </div>
+
+            <div className="flex items-center gap-3 flex-shrink-0 ml-4">
+              {/* Date */}
+              <span className="text-xs whitespace-nowrap" style={{ color: 'var(--text-tertiary)' }}>{date}</span>
+
+              {/* Edit button on hover */}
+              <div
+                className="flex items-center gap-1.5 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity"
+                style={{ color: 'var(--accent)' }}
+              >
+                <Edit2 size={13} />
+                Открыть
               </div>
             </div>
           </div>
