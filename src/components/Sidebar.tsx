@@ -157,7 +157,6 @@ export default function Sidebar() {
         <div className="flex items-center gap-1.5 px-2 py-1 flex-wrap">
           {[
             { name: 'TG', color: '#0088cc', active: true },
-            { name: 'VK', color: '#0077FF', active: false },
             { name: 'YT', color: '#FF0000', active: false },
             { name: 'IG', color: '#E1306C', active: false },
           ].map(p => (

@@ -97,10 +97,36 @@ export async function deleteChannel(id: string) {
 }
 
 export async function toggleChannel(id: string, isActive: boolean) {
-  return await prisma.channel.update({
+  const channel = await prisma.channel.update({
     where: { id },
     data: { isActive }
   });
+  revalidatePath('/channels');
+  return channel;
+}
+
+export async function updateChannel(
+  id: string, 
+  name: string, 
+  platform: string, 
+  platformId: string, 
+  isTestChannel: boolean = false, 
+  category?: string, 
+  credentials?: string
+) {
+  const channel = await prisma.channel.update({
+    where: { id },
+    data: { 
+      name, 
+      platform, 
+      platformId, 
+      isTestChannel, 
+      category: category || null, 
+      credentials: credentials || null 
+    }
+  });
+  revalidatePath('/channels');
+  return channel;
 }
 
 export async function getPosts() {

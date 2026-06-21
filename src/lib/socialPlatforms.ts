@@ -20,16 +20,7 @@ export const SOCIAL_PLATFORMS: SocialPlatform[] = [
     placeholder: '@mychannel или -100123456789',
     description: 'Каналы и чаты',
   },
-  {
-    id: 'VK',
-    name: 'ВКонтакте',
-    color: '#0077FF',
-    bgColor: '#e8f0fe',
-    icon: 'vk',
-    connected: false,
-    placeholder: 'ID группы',
-    description: 'Группы и паблики',
-  },
+
   {
     id: 'YOUTUBE',
     name: 'YouTube',

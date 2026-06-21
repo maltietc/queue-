@@ -1,12 +1,12 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { createChannel, deleteChannel, toggleChannel } from '../actions';
+import { createChannel, deleteChannel, toggleChannel, updateChannel } from '../actions';
 import { useRouter } from 'next/navigation';
 import { SOCIAL_PLATFORMS, getPlatformById } from '@/lib/socialPlatforms';
 import {
   LayoutList, LayoutGrid, Plus, Trash2, CheckCircle2, Circle, X,
-  ChevronDown, Send, Search, Tag
+  ChevronDown, Send, Search, Tag, Edit
 } from 'lucide-react';
 
 // ── Platform icon SVGs (inline) ──────────────────────────────────────────────
@@ -17,11 +17,7 @@ function PlatformIcon({ platformId, size = 16 }: { platformId: string; size?: nu
         <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248l-2.01 9.47c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12l-6.871 4.326-2.962-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.873.751z" />
       </svg>
     ),
-    VK: (
-      <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
-        <path d="M15.684 0H8.316C1.592 0 0 1.592 0 8.316v7.368C0 22.408 1.592 24 8.316 24h7.368C22.408 24 24 22.408 24 15.684V8.316C24 1.592 22.391 0 15.684 0zm3.692 17.123h-1.744c-.66 0-.864-.525-2.05-1.727-1.033-1.01-1.49-1.135-1.744-1.135-.356 0-.458.102-.458.593v1.575c0 .424-.135.678-1.253.678-1.846 0-3.896-1.118-5.335-3.202C4.624 10.857 4.03 8.57 4.03 8.096c0-.254.102-.491.593-.491h1.744c.44 0 .61.203.78.677.864 2.49 2.303 4.675 2.896 4.675.22 0 .322-.102.322-.66V9.721c-.068-1.186-.695-1.287-.695-1.71 0-.204.17-.407.44-.407h2.744c.373 0 .508.203.508.643v3.473c0 .372.17.508.271.508.22 0 .407-.136.813-.542 1.253-1.406 2.151-3.574 2.151-3.574.119-.254.322-.491.763-.491h1.744c.525 0 .644.271.525.643-.22 1.017-2.354 4.031-2.354 4.031-.186.305-.254.44 0 .78.186.254.796.779 1.203 1.253.745.847 1.32 1.558 1.473 2.05.17.491-.085.745-.576.745z" />
-      </svg>
-    ),
+
     YOUTUBE: (
       <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
         <path d="M23.495 6.205a3.007 3.007 0 0 0-2.088-2.088c-1.87-.501-9.396-.501-9.396-.501s-7.507-.01-9.396.501A3.007 3.007 0 0 0 .527 6.205a31.247 31.247 0 0 0-.522 5.805 31.247 31.247 0 0 0 .522 5.783 3.007 3.007 0 0 0 2.088 2.088c1.868.502 9.396.502 9.396.502s7.506 0 9.396-.502a3.007 3.007 0 0 0 2.088-2.088 31.247 31.247 0 0 0 .5-5.783 31.247 31.247 0 0 0-.5-5.805zM9.609 15.601V8.408l6.264 3.602z" />
@@ -57,10 +53,12 @@ export default function ChannelsClient({ initialChannels }: { initialChannels: a
 
   // Form fields
   const [showForm, setShowForm] = useState(false);
+  const [editingChannel, setEditingChannel] = useState<any | null>(null);
   const [name, setName] = useState('');
   const [selectedPlatform, setSelectedPlatform] = useState('TELEGRAM');
   const [platformId, setPlatformId] = useState('');
   const [category, setCategory] = useState('');
+  const [credentials, setCredentials] = useState('');
   const [isTestChannel, setIsTestChannel] = useState(false);
   const [error, setError] = useState('');
 
@@ -114,11 +112,38 @@ export default function ChannelsClient({ initialChannels }: { initialChannels: a
     try {
       const newChannel = await createChannel(name, selectedPlatform, platformId, isTestChannel, category || undefined);
       setChannels([newChannel, ...channels]);
-      setName(''); setPlatformId(''); setCategory(''); setIsTestChannel(false);
+      setName(''); setPlatformId(''); setCategory(''); setCredentials(''); setIsTestChannel(false);
       setShowForm(false);
       router.refresh();
     } catch (err: any) {
       setError(err.message || 'Ошибка при добавлении канала');
+    }
+    setLoading(false);
+  };
+
+  const handleEditChannel = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!name || !platformId || !editingChannel) { setError('Заполните все поля'); return; }
+
+    setLoading(true);
+    setError('');
+    try {
+      const updated = await updateChannel(
+        editingChannel.id,
+        name,
+        selectedPlatform,
+        platformId,
+        isTestChannel,
+        category || undefined,
+        credentials || undefined
+      );
+      setChannels(channels.map(c => c.id === editingChannel.id ? updated : c));
+      setEditingChannel(null);
+      setName(''); setPlatformId(''); setCategory(''); setCredentials(''); setIsTestChannel(false);
+      setShowForm(false);
+      router.refresh();
+    } catch (err: any) {
+      setError(err.message || 'Ошибка при редактировании канала');
     }
     setLoading(false);
   };
@@ -205,6 +230,23 @@ export default function ChannelsClient({ initialChannels }: { initialChannels: a
             {channel.isActive ? 'Активен' : 'Отключён'}
           </button>
           <button
+            onClick={() => {
+              setEditingChannel(channel);
+              setName(channel.name);
+              setSelectedPlatform(channel.platform);
+              setPlatformId(channel.platformId);
+              setCategory(channel.category || '');
+              setCredentials(channel.credentials || '');
+              setIsTestChannel(channel.isTestChannel);
+              setShowForm(true);
+            }}
+            className="notion-btn notion-btn-ghost opacity-0 group-hover:opacity-100 transition-opacity"
+            style={{ padding: '4px 6px' }}
+            title="Редактировать"
+          >
+            <Edit size={14} />
+          </button>
+          <button
             onClick={() => handleDelete(channel.id)}
             className="notion-btn notion-btn-danger opacity-0 group-hover:opacity-100 transition-opacity"
             style={{ padding: '4px 6px' }}
@@ -231,7 +273,15 @@ export default function ChannelsClient({ initialChannels }: { initialChannels: a
           </p>
         </div>
         <button
-          onClick={() => setShowForm(v => !v)}
+          onClick={() => {
+            if (showForm) {
+              setEditingChannel(null);
+              setName(''); setPlatformId(''); setCategory(''); setCredentials(''); setIsTestChannel(false);
+              setShowForm(false);
+            } else {
+              setShowForm(true);
+            }
+          }}
           className="notion-btn notion-btn-primary"
           style={{ gap: '6px' }}
         >
@@ -250,7 +300,9 @@ export default function ChannelsClient({ initialChannels }: { initialChannels: a
             padding: '20px',
           }}
         >
-          <h2 className="text-base font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>Новый канал</h2>
+          <h2 className="text-base font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>
+            {editingChannel ? 'Редактировать канал' : 'Новый канал'}
+          </h2>
 
           {error && (
             <div className="mb-4 px-3 py-2 text-sm rounded-sm" style={{ background: 'var(--danger-bg)', color: 'var(--danger)', border: '1px solid rgba(235,87,87,0.2)' }}>
@@ -258,7 +310,7 @@ export default function ChannelsClient({ initialChannels }: { initialChannels: a
             </div>
           )}
 
-          <form onSubmit={handleAddChannel} className="flex flex-col gap-4">
+          <form onSubmit={editingChannel ? handleEditChannel : handleAddChannel} className="flex flex-col gap-4">
             {/* Platform selector */}
             <div>
               <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--text-secondary)' }}>Платформа</label>
@@ -361,6 +413,23 @@ export default function ChannelsClient({ initialChannels }: { initialChannels: a
               )}
             </div>
 
+            {/* Credentials (Параметры подключения) */}
+            <div>
+              <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--text-secondary)' }}>
+                Параметры подключения (Токен / Ключ доступа)
+                <span style={{ fontWeight: 400, color: 'var(--text-tertiary)', marginLeft: '6px' }}>
+                  (необязательно) — сохраняются для проведения публикаций
+                </span>
+              </label>
+              <input
+                className="notion-input"
+                type="text"
+                value={credentials}
+                onChange={e => setCredentials(e.target.value)}
+                placeholder={selectedPlatform === 'TELEGRAM' ? 'Например: 8848564320:AAE2YpwnB3iow...' : 'Ключи авторизации / Токены'}
+              />
+            </div>
+
             {/* Test channel */}
             <label className="flex items-center gap-2 cursor-pointer" style={{ color: 'var(--text-secondary)', fontSize: '13px' }}>
               <input
@@ -375,9 +444,17 @@ export default function ChannelsClient({ initialChannels }: { initialChannels: a
             <div className="flex gap-2 pt-1">
               <button type="submit" disabled={loading} className="notion-btn notion-btn-primary" style={{ opacity: loading ? 0.6 : 1 }}>
                 <Send size={14} />
-                {loading ? 'Добавление...' : 'Добавить'}
+                {loading ? (editingChannel ? 'Сохранение...' : 'Добавление...') : (editingChannel ? 'Сохранить' : 'Добавить')}
               </button>
-              <button type="button" onClick={() => setShowForm(false)} className="notion-btn notion-btn-default">
+              <button 
+                type="button" 
+                onClick={() => {
+                  setEditingChannel(null);
+                  setName(''); setPlatformId(''); setCategory(''); setCredentials(''); setIsTestChannel(false);
+                  setShowForm(false);
+                }} 
+                className="notion-btn notion-btn-default"
+              >
                 Отмена
               </button>
             </div>
