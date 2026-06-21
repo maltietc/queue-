@@ -83,13 +83,25 @@ export async function createPost(content: string, sendNow: boolean, publishAt?: 
 
 export async function deletePost(id: string) {
   try {
-    const post = await prisma.post.delete({
-      where: { id }
-    });
+    const post = await prisma.post.findUnique({ where: { id } });
+    if (!post) throw new Error("Пост не найден");
+
+    let resultPost;
+    if (post.status === 'DELETED') {
+      resultPost = await prisma.post.delete({
+        where: { id }
+      });
+    } else {
+      resultPost = await prisma.post.update({
+        where: { id },
+        data: { status: 'DELETED' }
+      });
+    }
+
     revalidatePath('/drafts');
     revalidatePath('/history');
     revalidatePath('/calendar');
-    return { success: true, post };
+    return { success: true, post: resultPost };
   } catch (error: any) {
     console.error('Error deleting post:', error);
     return { success: false, error: error.message };
