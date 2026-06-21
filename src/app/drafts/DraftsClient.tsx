@@ -4,8 +4,9 @@ import React, { useState, useMemo } from 'react';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { useRouter } from 'next/navigation';
-import { Edit2, FileEdit, Search } from 'lucide-react';
+import { Edit2, FileEdit, Search, Trash2 } from 'lucide-react';
 import { getPlatformById } from '@/lib/socialPlatforms';
+import { deletePost } from '@/app/actions';
 
 export default function DraftsClient({ drafts }: { drafts: any[] }) {
   const router = useRouter();
@@ -200,13 +201,34 @@ export default function DraftsClient({ drafts }: { drafts: any[] }) {
                     {/* Date */}
                     <span className="text-xs whitespace-nowrap" style={{ color: 'var(--text-tertiary)' }}>{date}</span>
 
-                    {/* Edit button on hover */}
-                    <div
-                      className="flex items-center gap-1.5 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity"
-                      style={{ color: 'var(--accent)' }}
-                    >
-                      <Edit2 size={13} />
-                      Открыть
+                    {/* Actions on hover */}
+                    <div className="flex items-center gap-2.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div
+                        className="flex items-center gap-1.5 text-xs font-medium"
+                        style={{ color: 'var(--accent)' }}
+                      >
+                        <Edit2 size={13} />
+                        Открыть
+                      </div>
+                      
+                      <button
+                        onClick={async (e) => {
+                          e.stopPropagation();
+                          if (confirm('Вы уверены, что хотите удалить этот черновик?')) {
+                            const res = await deletePost(post.id);
+                            if (res.success) {
+                              router.refresh();
+                            } else {
+                              alert('Не удалось удалить черновик: ' + res.error);
+                            }
+                          }
+                        }}
+                        className="flex items-center justify-center p-1 rounded hover:bg-[var(--danger-bg)] text-[var(--danger)] cursor-pointer transition-colors"
+                        title="Удалить черновик"
+                        style={{ border: 'none', background: 'transparent' }}
+                      >
+                        <Trash2 size={13} />
+                      </button>
                     </div>
                   </div>
                 </div>

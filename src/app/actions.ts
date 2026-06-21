@@ -81,6 +81,21 @@ export async function createPost(content: string, sendNow: boolean, publishAt?: 
   }
 }
 
+export async function deletePost(id: string) {
+  try {
+    const post = await prisma.post.delete({
+      where: { id }
+    });
+    revalidatePath('/drafts');
+    revalidatePath('/history');
+    revalidatePath('/calendar');
+    return { success: true, post };
+  } catch (error: any) {
+    console.error('Error deleting post:', error);
+    return { success: false, error: error.message };
+  }
+}
+
 // Channels API
 export async function getChannels() {
   return await prisma.channel.findMany({ orderBy: { createdAt: 'desc' } });
