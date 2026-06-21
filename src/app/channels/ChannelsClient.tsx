@@ -101,12 +101,6 @@ export default function ChannelsClient({ initialChannels }: { initialChannels: a
     e.preventDefault();
     if (!name || !platformId) { setError('Заполните все поля'); return; }
 
-    const platform = getPlatformById(selectedPlatform);
-    if (platform && !platform.connected) {
-      setError(`Интеграция с ${platform.name} ещё не реализована. Сейчас доступен только Telegram.`);
-      return;
-    }
-
     setLoading(true);
     setError('');
     try {
