@@ -131,18 +131,7 @@ export default function EditorClient({ initialPost, channels = [] }: { initialPo
       )}
 
       {/* Editor area */}
-      <div
-        style={{
-          border: '1px solid var(--border-default)',
-          borderRadius: 'var(--radius-md)',
-          background: 'var(--bg-primary)',
-          minHeight: '320px',
-          padding: '0',
-          overflow: 'hidden',
-        }}
-      >
-        <Editor content={content} onChange={setContent} />
-      </div>
+      <Editor content={content} onChange={setContent} />
 
       {/* Error */}
       {error && (
