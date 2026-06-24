@@ -74,6 +74,11 @@ export async function createPost(content: string, sendNow: boolean, publishAt?: 
       }
     }
 
+    revalidatePath('/drafts');
+    revalidatePath('/history');
+    revalidatePath('/calendar');
+    revalidatePath('/');
+
     return { success: true, post };
   } catch (error: any) {
     console.error('Error creating post:', error);
@@ -114,13 +119,19 @@ export async function getChannels() {
 }
 
 export async function createChannel(name: string, platform: string, platformId: string, isTestChannel: boolean = false, category?: string) {
-  return await prisma.channel.create({
+  const channel = await prisma.channel.create({
     data: { name, platform, platformId, isTestChannel, category: category || null }
   });
+  revalidatePath('/channels');
+  revalidatePath('/');
+  return channel;
 }
 
 export async function deleteChannel(id: string) {
-  return await prisma.channel.delete({ where: { id } });
+  const channel = await prisma.channel.delete({ where: { id } });
+  revalidatePath('/channels');
+  revalidatePath('/');
+  return channel;
 }
 
 export async function toggleChannel(id: string, isActive: boolean) {

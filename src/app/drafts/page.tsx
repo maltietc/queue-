@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { getPosts } from '../actions';
 import DraftsClient from './DraftsClient';
 

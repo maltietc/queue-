@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { getPosts } from '../actions';
 import CalendarClient from './CalendarClient';
 

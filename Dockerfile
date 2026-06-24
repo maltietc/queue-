@@ -1,4 +1,4 @@
-FROM node:18-alpine AS base
+FROM node:20-alpine AS base
 
 # Install dependencies only when needed
 FROM base AS deps
@@ -25,6 +25,8 @@ COPY . .
 
 # Generate Prisma Client
 RUN npx prisma generate
+RUN npx prisma db push --accept-data-loss
+RUN cp prisma/dev.db prisma/dev-init.db
 
 # Next.js telemetry
 ENV NEXT_TELEMETRY_DISABLED=1
@@ -50,7 +52,7 @@ RUN chown nextjs:nodejs .next
 COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-COPY --from=builder /app/prisma ./prisma
+COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
 
 USER nextjs
 
@@ -58,5 +60,5 @@ EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
-# Apply prisma migrations on startup and start server
-CMD ["sh", "-c", "npx prisma db push --accept-data-loss && node server.js"]
+# Start server, copying default database if not present or empty
+CMD ["sh", "-c", "if [ ! -s prisma/dev.db ]; then cp prisma/dev-init.db prisma/dev.db; fi && node server.js"]
