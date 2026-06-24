@@ -61,6 +61,16 @@ export const SOCIAL_PLATFORMS: SocialPlatform[] = [
     placeholder: '@username',
     description: 'Аккаунты',
   },
+  {
+    id: 'TELETYPE',
+    name: 'Teletype',
+    color: '#5B41F5',
+    bgColor: '#efeefd',
+    icon: 'teletype',
+    connected: true,
+    placeholder: 'Имя блога или токен API',
+    description: 'Блоги teletype.in',
+  },
 ];
 
 export function getPlatformById(id: string): SocialPlatform | undefined {

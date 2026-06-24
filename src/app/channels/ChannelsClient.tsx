@@ -38,6 +38,12 @@ function PlatformIcon({ platformId, size = 16 }: { platformId: string; size?: nu
         <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.11 8.11 0 0 0 4.76 1.52V6.76a4.85 4.85 0 0 1-1-.07z" />
       </svg>
     ),
+    TELETYPE: (
+      <svg width={size} height={size} viewBox="0 0 32 32" fill="none">
+        <rect width="32" height="32" fill="#5B41F5" rx="6"/>
+        <path fill="#FFFFFF" d="M8.5 10v2.933h4.766v7.2c0 3.2 1.936 3.867 4.766 3.867 1.787 0 2.532-.267 2.532-.267v-2.8s-.447.134-1.34.134c-1.341 0-1.788-.4-1.788-1.6v-6.534H22.5V10h-14Z"/>
+      </svg>
+    ),
   };
   return icons[platformId] || <span style={{ fontSize: size * 0.7 }}>●</span>;
 }
