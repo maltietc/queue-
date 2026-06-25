@@ -18,9 +18,7 @@ RUN \
   fi
 
 # Rebuild the source code only when needed
-FROM base AS builder
-WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
+FROM deps AS builder
 COPY . .
 
 # Generate Prisma Client
@@ -33,6 +31,9 @@ ENV NEXT_TELEMETRY_DISABLED=1
 
 # Build the app
 RUN npm run build
+
+# Prune dev dependencies, keeping optional dependencies (native binaries)
+RUN pnpm prune --prod
 
 # Production image, copy all the files and run next
 FROM base AS runner
@@ -53,6 +54,7 @@ COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules ./node_modules
 
 USER nextjs
 
